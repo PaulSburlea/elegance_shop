@@ -18,6 +18,12 @@
 <body>
 <?php
 require('db.php');
+require('PHPMailer.php');
+require('Exception.php');
+require('SMTP.php');
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $errors = [];
@@ -49,6 +55,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $dob = $_POST['year'] . '-' . $_POST['month'] . '-' . $_POST['day'];
         $country = stripslashes($_POST['country']);
         $create_datetime = date("Y-m-d H:i:s");
+        $verificationCode = substr(md5(uniqid(rand(), true)), 0, 5);
+
+        // Validate email format
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $errors[] = "Invalid email format";
+        }
 
         $check_user_query = "SELECT * FROM `users` WHERE username='$username' OR email='$email'";
         $check_user_result = mysqli_query($con, $check_user_query);
@@ -59,15 +71,44 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
               <p class='link'>Click <a href='registration.php'>here</a> to try again.</a>.</p>
               </div>";
         } else {
-            $query = "INSERT into `users` (username, password, email, dob, country, create_datetime)
-                      VALUES ('$username', '" . md5($password) . "', '$email', '$dob', '$country', '$create_datetime')";
+            $query = "INSERT into `users` (username, password, email, dob, country, create_datetime, verification_code)
+                      VALUES ('$username', '" . md5($password) . "', '$email', '$dob', '$country', '$create_datetime', '$verificationCode')";
             $result = mysqli_query($con, $query);
 
+
             if ($result) {
-                echo "<div class='form'>
-                      <h3>Registration successful.</h3><br/>
-                      <p class='link'>Click <a href='login.php' to login>Login.</a>.</p>
-                      </div>";
+                // Send verification email
+                $mail = new PHPMailer;
+                $mail->isSMTP();
+                $mail->Host = 'smtp-relay.brevo.com'; // Set your SMTP host
+                $mail->Port = 587; // Set your SMTP port
+                $mail->SMTPAuth = true;
+                $mail->Username = 'paulsbrl7@gmail.com'; // Set your SMTP username
+                $mail->Password = 'xsmtpsib-a4284ec7a08130e640bd6cacc3618ad986932976df3f4d950c1227e9c77610df-XMGpF5IQTKBCnxJv'; // Set your SMTP password
+                $mail->setFrom('paulsbrl7@gmail.com', 'Elegance Shop'); // Set the sender's email address and name
+                $mail->addAddress($email); // Set the recipient's email address
+                $mail->isHTML(true);
+                $mail->Subject = 'Elegance Shop - Account Verification';
+                $mail->Body = "
+                <html>
+                    <body>
+                        <p>Hello $username,</p>
+                        <p>Welcome to Elegance Shop! We're excited to have you on board. To complete your account setup, please use the verification code below:</p>
+                        <p><strong>Verification Code:</strong> $verificationCode</p>
+                        <p>Please enter this code in the verification section of your account settings to activate your account. If you didn't sign up for Elegance Shop, you can ignore this email.</p>
+                        <p>Thank you for choosing Elegance Shop!</p>
+                        <p>Best Regards!</p>
+                    </body>
+                </html>
+            ";
+                if ($mail->send()) {
+                    header("Location: verify.php?email=" . urlencode($email)); // Pass email to verify.php
+                    exit();
+                } else {
+                    echo "<div class='form'>
+                          <h3>Error sending verification email.</h3><br/>
+                          </div>";
+                }
             } else {
                 echo "<div class='form'>
                       <h3>Required fields are missing.</h3><br/>
@@ -85,10 +126,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 } else {
 ?>
+<!-- Your existing HTML form code remains unchanged -->
+
 <form class="form" action="" method="post" onsubmit="return validateForm();">
     <h1 class="login-title">Registration</h1>
     <input type="text" class="login-input" name="username" placeholder="Username" required/>
-    <input type="text" class="login-input" name="email" placeholder="Email Adress">
+    <input type="email" class="login-input" name="email" placeholder="Email Address" required/>
     <input type="password" class="login-input" name="password" placeholder="Password">
 
     <div class="birthdate-container">

@@ -304,30 +304,37 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
         if ($product_stock > 0) {
             echo "<p class='product-stock'>Available in stock</p>";
         } else {
-            echo "<p class='product-stock out-of-stock'>Not available in stockc</p>";
+            echo "<p class='product-stock out-of-stock'></p>";
         }
         ?>
 
-        <!-- Form -->
-        <form class="cart-form clearfix" method="post">
-            <!-- Cart & Favourite Box -->
-            <div class="cart-fav-box d-flex align-items-center">
-                <!-- Cart -->
-                <div class="add-to-cart-btn">
-                <button onclick=addToCart(this)
-                                    data-product-id="<?php echo $row['id']; ?>"
-                                    data-product-name="<?php echo $row['nume']; ?>"
-                                    data-product-price="<?php echo $row['pret']; ?>"
-                                    data-product-image="<?php echo $row['imagine_cale']; ?>">
-                                    Add to cart
-                            </button>          
-                </div>
-                                  <!-- Favourite -->
-                <div class="product-favourite ml-4">
-                    <a href="#" class="favme fa fa-heart"></a>
-                </div>
+<!-- Form -->
+<form class="cart-form clearfix" method="post">
+    <!-- Cart & Favourite Box -->
+    <div class="cart-fav-box d-flex align-items-center">
+        <?php if ($product_stock > 0) : ?>
+            <!-- Cart -->
+            <div class="add-to-cart-btn">
+                <button onclick="addToCart(this)"
+                        data-product-id="<?php echo $row['id']; ?>"
+                        data-product-name="<?php echo $row['nume']; ?>"
+                        data-product-price="<?php echo $row['pret']; ?>"
+                        data-product-image="<?php echo $row['imagine_cale']; ?>">
+                        Add to cart
+                </button>
             </div>
-        </form>
+        <?php else : ?>
+            <!-- Not in Stock -->
+            <p class="product-stock out-of-stock">Not available in stock</p>
+        <?php endif; ?>
+
+        <!-- Favourite -->
+        <div class="product-favourite ml-4">
+            <a href="#" class="favme fa fa-heart"></a>
+        </div>
+    </div>
+</form>
+
     </div>
 </section>
 

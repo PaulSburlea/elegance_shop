@@ -554,13 +554,15 @@ if ($result->num_rows > 0) {
 
                     <div class="hover-content">
                     <div class="add-to-cart-btn">
-                            <button onclick=addToCart(this)
+                    <button onclick=addToCart(this)
                                     data-product-id="<?php echo $row['id']; ?>"
                                     data-product-name="<?php echo $row['nume']; ?>"
                                     data-product-price="<?php echo $row['pret']; ?>"
-                                    data-product-image="<?php echo $row['imagine_cale']; ?>">
+                                    data-product-image="<?php echo $row['imagine_cale']; ?>"
+                                    data-product-stock="<?php echo $row['stoc']; ?>">>
                                     Add to cart
                             </button>
+
 
                     </div>
 
@@ -574,7 +576,6 @@ if ($result->num_rows > 0) {
 } else {
     echo "Nu există produse în baza de date pentru categoria selectată.";
 }
-
 
 
 // Calcularea numărului total de produse din subcategorie
@@ -626,45 +627,53 @@ if ($total_pagini > 1) {
 }
 ?>
 
+
 <script>
-function addToCart(button) {
-    var productId = button.getAttribute('data-product-id');
-    var productName = button.getAttribute('data-product-name');
-    var productPrice = button.getAttribute('data-product-price');
-    var productImage = button.getAttribute('data-product-image');
+    function addToCart(button) {
+        var productId = button.getAttribute('data-product-id');
+        var productName = button.getAttribute('data-product-name');
+        var productPrice = button.getAttribute('data-product-price');
+        var productImage = button.getAttribute('data-product-image');
+        var productStock = button.getAttribute('data-product-stock');
 
-    // Trimite datele la server utilizând AJAX
-    var xhr = new XMLHttpRequest();
-    xhr.onreadystatechange = function() {
-        if (xhr.readyState === 4) {
-            if (xhr.status === 200) {
-                // Răspunsul de la server
-                console.log(xhr.responseText);
-
-                // Actualizează conținutul coșului sau alte elemente pe care dorești să le actualizezi
-                // Poți implementa această parte în funcție de cum sunt gestionate datele în coș și în pagină
-
-                // Reîncarcă pagina după adăugarea produsului în coș
-                window.location.reload();
-            } else {
-                console.error('Eroare la comunicarea cu serverul.');
-            }
+        // Verifică dacă produsul este în stoc
+        if (productStock <= 0) {
+            alert('Produsul "' + productName + '" nu este în stoc.');
+            return; // Nu continua dacă produsul nu este în stoc
         }
-    };
 
-    // Definiți metoda și URL-ul pentru cerere
-    xhr.open('POST', 'add_to_cart.php', true);
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        // Trimite datele la server utilizând AJAX
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    // Răspunsul de la server
+                    console.log(xhr.responseText);
 
-    // Trimite datele către server
-    xhr.send('product_id=' + encodeURIComponent(productId) +
-             '&product_name=' + encodeURIComponent(productName) +
-             '&product_price=' + encodeURIComponent(productPrice) +
-             '&product_image=' + encodeURIComponent(productImage));
-}
+                    // Actualizează conținutul coșului sau alte elemente pe care dorești să le actualizezi
+                    // Poți implementa această parte în funcție de cum sunt gestionate datele în coș și în pagină
 
+                    // Reîncarcă pagina după adăugarea produsului în coș
+                    window.location.reload();
+                } else {
+                    console.error('Eroare la comunicarea cu serverul.');
+                }
+            }
+        };
 
+        // Definiți metoda și URL-ul pentru cerere
+        xhr.open('POST', 'add_to_cart.php', true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+        // Trimite datele către server
+        xhr.send('product_id=' + encodeURIComponent(productId) +
+                 '&product_name=' + encodeURIComponent(productName) +
+                 '&product_price=' + encodeURIComponent(productPrice) +
+                 '&product_image=' + encodeURIComponent(productImage));
+    }
 </script>
+
+
 
 
 

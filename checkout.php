@@ -8,6 +8,9 @@ if (isset($_SESSION['user_id'])) {
     $userId = $con->real_escape_string($_SESSION['user_id']);
 }
 
+
+require('db.php');
+
 ?>
 
 <!DOCTYPE html>

@@ -108,7 +108,7 @@ if ($result->num_rows > 0) {
                                     <a href="#"><?php echo "Hello, $username!"; ?></a>
                                     <ul class="dropdown">
                                         <li><a href="settings.php">Settings</a></li>
-                                        <li><a href="my-orders.php">My Orders</a></li>
+                                        <li><a href="my_orders.php">My Orders</a></li>
                                     </ul>
                                 </li>
                                 <?php if ($is_admin): ?>
