@@ -113,7 +113,14 @@ if ($result->num_rows > 0) {
                                 </li>
                                 <?php if ($is_admin): ?>
                                     <span style="border-left: 1px solid #ccc; height: 20px; margin: 0 10px;"></span> <!-- Separator vertical -->
-                                    <li><a href="dashboard.php">Dashboard</a></li>
+                                    <li>
+                                        <a href="#">Dashboard</a>
+                                        <ul class="dropdown">
+                                            <li><a href="dashboard.php">Add Products</a></li>
+                                            <li><a href="admin_orders.php">Manage Orders</a></li>
+                                    </ul>
+
+                                    </li>
                                 <?php endif; ?>
 
 
@@ -136,7 +143,7 @@ if ($result->num_rows > 0) {
                 </div>
                 <!-- Favourite Area -->
                 <div class="favourite-area">
-                    <a href="#"><img src="img/core-img/heart.svg" alt=""></a>
+                    <a href="favourite.php"><img src="img/core-img/heart.svg" alt=""></a>
                 </div>
                 <!-- Cart Area -->
                 <div class="cart-area">

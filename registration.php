@@ -84,7 +84,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $mail->Port = 587; // Set your SMTP port
                 $mail->SMTPAuth = true;
                 $mail->Username = 'paulsbrl7@gmail.com'; // Set your SMTP username
-                $mail->Password = 'xsmtpsib-a4284ec7a08130e640bd6cacc3618ad986932976df3f4d950c1227e9c77610df-XMGpF5IQTKBCnxJv'; // Set your SMTP password
+                $mail->Password = ''; // Set your SMTP password
                 $mail->setFrom('paulsbrl7@gmail.com', 'Elegance Shop'); // Set the sender's email address and name
                 $mail->addAddress($email); // Set the recipient's email address
                 $mail->isHTML(true);

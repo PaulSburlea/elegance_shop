@@ -85,6 +85,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         // Send email confirmation
         $mail = new PHPMailer(true);
+        $mail->CharSet = "UFT-8";
 
         // Configurări server SMTP
         $mail->SMTPDebug = 0; // Setează la 2 pentru debugging
@@ -92,7 +93,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $mail->Host = 'smtp-relay.brevo.com'; // Serverul tău SMTP
         $mail->SMTPAuth = true;
         $mail->Username = 'paulsbrl7@gmail.com'; // Username-ul tău SMTP
-        $mail->Password = 'xsmtpsib-a4284ec7a08130e640bd6cacc3618ad986932976df3f4d950c1227e9c77610df-XMGpF5IQTKBCnxJv'; // Parola ta SMTP
+        $mail->Password = ''; // Parola ta SMTP
         $mail->SMTPSecure = 'tls'; // Activează criptarea TLS, acceptă și 'ssl'
         $mail->Port = 587; // Portul TCP pentru conexiune
 
@@ -121,7 +122,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $productPrice = $cartItem['product_price'];
         
             // Adaugă detalii despre produs în corpul email-ului
-            $productList .= '<p>' . $productName . ': $' . $productPrice . '</p>';
+            $productList .= '<p>' . $productName . ': ' . $productPrice . ' €' . '</p>';
         
             // Adaugă prețul produsului la total
             $totalPrice += $productPrice;
@@ -129,7 +130,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         
         // Adaugă lista de produse și totalul în corpul email-ului
         $mailBody .= '<p><strong>Product List:</strong></p>' . $productList;
-        $mailBody .= '<p><strong>Total Price:</strong> $' . number_format($totalPrice, 2) . '</p>';
+        $mailBody .= '<p><strong>Total Price:</strong> ' . number_format($totalPrice, 2) . ' €' . '</p>';
         $mailBody .= '<p><strong>Payment Method:</strong> Cash on Delivery (COD)</p>';
         
         $mail->Body = $mailBody;

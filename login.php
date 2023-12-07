@@ -9,33 +9,40 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $password = stripslashes($_POST['password']);
     $password = mysqli_real_escape_string($con, $password);
 
-    $query = "SELECT * FROM `users` WHERE username='$username' AND password='" . md5($password) . "'";
-    $result = mysqli_query($con, $query) or die(mysql_error());
+    $query = "SELECT * FROM `users` WHERE username='$username' AND password='" . md5($password) . "' AND verified=1";
+    $result = mysqli_query($con, $query) or die(mysqli_error($con));
     $rows = mysqli_num_rows($result);
 
     if ($rows == 1) {
         // Autentificare reușită, obținem toate informațiile despre utilizator
-        $user_data_query = "SELECT * FROM `users` WHERE username='$username'";
+        $user_data_query = "SELECT * FROM `users` WHERE username='$username' AND verified=1";
         $user_data_result = mysqli_query($con, $user_data_query);
         $user_data = mysqli_fetch_assoc($user_data_result);
 
-        // Stocăm toate informațiile despre utilizator în sesiune
-        $_SESSION['user_id'] = $user_data['id'];
+        if ($user_data) {
+            // Stocăm toate informațiile despre utilizator în sesiune
+            $_SESSION['user_id'] = $user_data['id'];
+            $_SESSION['username'] = $user_data['username'];
+            $_SESSION['email'] = $user_data['email'];
+            $_SESSION['dob'] = $user_data['dob'];
+            $_SESSION['country'] = $user_data['country'];
+            $_SESSION['authenticated'] = true; // Adăugați această linie pentru a marca autentificarea
 
-        $_SESSION['username'] = $user_data['username'];
-        $_SESSION['email'] = $user_data['email'];
-        $_SESSION['dob'] = $user_data['dob'];
-        $_SESSION['country'] = $user_data['country'];
-        $_SESSION['authenticated'] = true; // Adăugați această linie pentru a marca autentificarea
+            // Decideți unde să redirecționați utilizatorul în funcție de statutul de autentificare
+            if (isset($_SESSION['authenticated'])) {
+                header("Location: index_autentificat.php");
+            } else {
+                header("Location: index.php");
+            }
 
-        // Decideți unde să redirecționați utilizatorul în funcție de statutul de autentificare
-        if (isset($_SESSION['authenticated'])) {
-            header("Location: index_autentificat.php");
+            exit();
         } else {
-            header("Location: index.php");
+            // Utilizatorul nu este verificat
+            echo "<div class='form'>
+                  <h3>Account not verified. Please check your email for verification.</h3><br/>
+                  <p class='link'>Click here to <a href='login.php'>Login</a> again.</p>
+                  </div>";
         }
-
-        exit();
     } else {
         // Autentificare eșuată
         echo "<div class='form'>
@@ -63,6 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <html>
 <head>
     <meta charset="utf-8"/>
+    
     <title>Login</title>
     <link rel="icon" href="img/core-img/logo_alb.png">
     <link rel="stylesheet" href="style1.css"/>

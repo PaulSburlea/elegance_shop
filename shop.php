@@ -148,7 +148,7 @@ function getProductsBySubcategory($con, $subcategory) {
                 </div>
                 <!-- Favourite Area -->
                 <div class="favourite-area">
-                    <a href="#"><img src="img/core-img/heart.svg" alt=""></a>
+                    <a href="favourite.php"><img src="img/core-img/heart.svg" alt=""></a>
                 </div>
                 <!-- Cart Area -->
                 <div class="cart-area">
@@ -533,6 +533,23 @@ $result = $con->query($sql);
 if ($result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
         // Afiseaza produsele
+            // Verificăm dacă produsul este în favorite
+    $productId = $row['id'];
+    $isInFavorites = false; // Inițial, presupunem că produsul nu este în favorite
+
+    // Dacă utilizatorul este autentificat, verificăm în baza de date dacă produsul este în lista de favorite
+    if (isset($_SESSION['user_id'])) {
+        $userId = $_SESSION['user_id'];
+        $checkQuery = "SELECT * FROM favorites WHERE user_id = $userId AND product_id = $productId";
+        $checkResult = $con->query($checkQuery);
+
+        if ($checkResult && $checkResult->num_rows > 0) {
+            $isInFavorites = true; // Produsul este în favorite
+        }
+    }
+
+    // Adăugăm clasa CSS în funcție de starea produsului în favorite
+    $favoriteClass = $isInFavorites ? 'in-favorites' : '';
         ?>
         <div class="col-12 col-sm-6 col-lg-4">
             <div class="single-product-wrapper">
@@ -543,8 +560,14 @@ if ($result->num_rows > 0) {
                         <!-- Alte elemente HTML aici, cum ar fi imaginea pentru hover, badge-uri, etc. -->
 
                         <div class="product-favourite">
-                            <a href="#" class="favme fa fa-heart"></a>
-                        </div>
+    <a href="#" class="favme fa fa-heart" onclick="addToFavorites(
+        <?php echo $row['id']; ?>,
+        '<?php echo $row['nume']; ?>',
+        <?php echo $row['pret']; ?>,
+        '<?php echo $row['imagine_cale']; ?>'
+    )"></a>
+</div>
+
                     </div>
                 </a>
 
@@ -562,6 +585,7 @@ if ($result->num_rows > 0) {
                                     data-product-stock="<?php echo $row['stoc']; ?>">>
                                     Add to cart
                             </button>
+                            
 
 
                     </div>
@@ -671,7 +695,10 @@ if ($total_pagini > 1) {
                  '&product_price=' + encodeURIComponent(productPrice) +
                  '&product_image=' + encodeURIComponent(productImage));
     }
+
 </script>
+
+
 
 
 
@@ -766,7 +793,32 @@ if ($total_pagini > 1) {
 
 
 
-
+<script>
+    function addToFavorites(productId, productName, productPrice, productImage) {
+        $.ajax({
+            type: 'POST',
+            url: 'add_to_favorite.php',
+            data: {
+                product_id: productId,
+                product_name: productName,
+                product_price: productPrice,
+                product_image: productImage
+            },
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    alert('Product added to favorites!');
+                } else {
+                    alert('Error adding product to favorites: ' + response.message);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX error: ' + status, error);
+                console.log(xhr.responseText);
+            }
+        });
+    }
+</script>
 
 
 </body>

@@ -30,7 +30,7 @@ if (!isset($_SESSION['user_id'])) {
 $userId = $_SESSION['user_id'];
 
 // Interogare pentru a obține toate comenzile utilizatorului
-$ordersQuery = "SELECT * FROM orderss WHERE user_id = '$userId'";
+$ordersQuery = "SELECT * FROM orderss WHERE user_id = '$userId' ORDER BY order_id DESC";
 $ordersResult = $con->query($ordersQuery);
 ?>
 
@@ -44,117 +44,184 @@ $ordersResult = $con->query($ordersQuery);
     <title>My Orders</title>
 
 
-<style>
+    <style>
     body {
-        font-family: 'Arial', sans-serif;
+        font-family: 'Montserrat', sans-serif; /* Adaugă fonta Montserrat */
         line-height: 1.6;
-        background-color: #f4f4f4;
-        display: grid;
-        gap: 20px;
+        background-color: white;
+        padding: 20px;
+        margin: 0;
+        text-align: center;
     }
 
-    .container {
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    th, td {
+        border: 1px solid #ddd;
+        padding: 12px;
+        text-align: left;
+    }
+
+    th {
+        background-color: #f2f2f2;
+    }
+
+    .order-container {
         max-width: 800px;
         margin: 0 auto;
-        padding: 20px;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 20px;
+        margin-top: 30px;
     }
 
-    .card {
-        border: 1px solid #ddd;
+    .order {
+        margin-bottom: 20px;
+        background-color: #fff;
         border-radius: 8px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        display: grid;
-        grid-template-columns: 1fr 1fr;
+        overflow: hidden;
     }
 
-    .user-container,
-    .products-container,
-    .status-container {
-        padding: 20px;
-        border-bottom: 1px solid #ddd;
-    }
-
-    .user-container {
-        grid-column: 1; /* Afișează în prima coloană */
-    }
-
-    .products-container {
-        grid-column: 2; /* Afișează în a doua coloană */
-    }
-
-    .card-title {
+    .table-title {
         font-size: 24px;
-        margin-bottom: 10px;
+        font-weight: bold;
+        margin-bottom: 15px;
     }
 
-    .card-text {
-        font-size: 16px;
+    .product-list {
+        margin-top: 10px;
         margin-bottom: 10px;
+        padding: 15px;
+        border-top: 1px solid #ddd;
     }
+
+    .product {
+        display: block;
+        margin-bottom: 8px;
+    }
+
+    .order-status {
+        font-weight: bold;
+        margin-top: 10px;
+        padding: 15px;
+        background-color: #f2f2f2;
+    }
+
+    .page-title {
+        font-family: 'Montserrat', sans-serif; /* Adaugă fonta Montserrat */
+        font-size: 32px;
+        font-weight: bold;
+        color: #333;
+        margin: 20px 0;
+    }
+
+    .order-container {
+        max-width: 800px;
+        margin: 0 auto;
+        margin-top: 30px;
+    }
+
+.processing {
+    color: blue; /* culoarea textului pentru starea 'Processing' */
+}
+
+.shipped {
+    color: blueviolet; /* culoarea textului pentru starea 'Shipped' */
+}
+
+.delivered {
+    color: green; /* culoarea textului pentru starea 'Delivered' */
+}
+
+.cancelled {
+    color: red; /* culoarea textului pentru starea 'Cancelled' */
+}
+
 </style>
 
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700&display=swap">
 </head>
 <body>
 
-<div class="container">
+<header class="header_area">
+    <div>
+        <a href="index.php">Home</a>
+        <a href="contact.php">Contact</a>
+    </div>
+</header>
+<h1 class="page-title">My Orders</h1>
+
+<div class="order-container">
     <?php
     if ($ordersResult && $ordersResult->num_rows > 0) {
+        echo '<div class="table-title">My Orders</div>';
+        echo '<table>';
+        echo '<tr>';
+        echo '<th>Order ID</th>';
+        echo '<th>Products</th>';
+        echo '<th>Total Price</th>';
+        echo '<th>Order Date</th>';
+        echo '<th>Order Status</th>';
+        echo '</tr>';
+
         while ($order = $ordersResult->fetch_assoc()) {
-            // Afișează detalii despre comandă
-            echo '<div class="card">';
+            echo '<tr class="order">';
             
-            // Container pentru informații despre utilizator
-            echo '<div class="user-container">';
-            echo '<p class="card-title">Order ID: ' . $order['order_id'] . '</p>';
-            echo '<p class="card-text">Name: ' . $order['first_name'] . ' ' . $order['last_name'] . '</p>';
-            echo '<p class="card-text">Email: ' . $order['email_address'] . '</p>';
-            $countryAbbreviation = strtolower($order['country']);
-            $countryFullName = isset($countryAbbreviations[$countryAbbreviation]) ? $countryAbbreviations[$countryAbbreviation] : $order['country'];
-            echo '<p class="card-text">Address: ' . $countryFullName . ', ' . $order['street_address'] . ', ' . $order['postcode'] . ', ' . $order['city'] . ', ' . $order['county'] . '</p>';
-            echo '<p class="card-text">Phone Number: ' . $order['phone_number'] . '</p>';
-            echo '<p class="card-text">Total Price: $' . $order['total_price'] . '</p>';
-            echo '</div>';
+            // Informații despre comandă
+            echo '<td>#' . $order['order_id'] . '</td>';
 
-            
-            // Container pentru lista de produse
-            // Container pentru lista de produse
-            echo '<div class="products-container">';
-            echo '<p class="card-title">Product List</p>';
-
-            // Obține lista de produse pentru comanda curentă
+            // Lista de produse
+            echo '<td class="product-list">';
             $orderId = $order['order_id'];
             $productsQuery = "SELECT * FROM order_items WHERE order_id = '$orderId'";
             $productsResult = $con->query($productsQuery);
 
             if ($productsResult && $productsResult->num_rows > 0) {
                 while ($product = $productsResult->fetch_assoc()) {
-                    echo '<p class="card-text">' . $product['product_name'] . ' - $' . $product['product_price'] . '</p>';
+                    echo '<p class="product">' . $product['product_name'] . ' - $' . $product['product_price'] . '</p>';
                 }
             } else {
                 echo '<p>No products found for this order.</p>';
             }
+            echo '</td>';
 
-            echo '</div>';
-            
-            // Container pentru Order Status
-            echo '<div class="status-container">';
-            echo '<p class="card-title">Order Status</p>';
-            echo '<p><strong>' . $order['order_status'] . '</strong></p>';
-            echo '</div>';
+            // Total Price
+            echo '<td>$' . $order['total_price'] . '</td>';
 
-            echo '</div>'; // .card
+            // Order Date - utilizează funcția DATE() pentru a afișa doar data
+            echo '<td>' . date('Y-m-d', strtotime($order['order_date'])) . '</td>';
+
+// Starea comenzii
+$orderStatusClass = '';
+switch ($order['order_status']) {
+    case 'Processing':
+        $orderStatusClass = 'processing';
+        break;
+    case 'Shipped':
+        $orderStatusClass = 'shipped';
+        break;
+    case 'Delivered':
+        $orderStatusClass = 'delivered';
+        break;
+    case 'Cancelled':
+        $orderStatusClass = 'cancelled';
+        break;
+    default:
+        $orderStatusClass = '';
+}
+
+echo '<td class="order-status ' . $orderStatusClass . '">' . $order['order_status'] . '</td>';
+
         }
+
+        echo '</table>';
     } else {
         echo '<p>No orders found.</p>';
     }
     ?>
 </div>
-
-
-
 
 
 <!-- Adaugă codul pentru subsol, așa cum este în fișierul original -->
@@ -187,7 +254,9 @@ $ordersResult = $con->query($ordersQuery);
             </div>
         </nav>
     </div>
+
 </header>
+
 
 
 
