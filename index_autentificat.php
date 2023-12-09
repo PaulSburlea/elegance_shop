@@ -98,10 +98,8 @@ if ($result->num_rows > 0) {
                                 <ul class="dropdown">
                                     <li><a href="index.php">Home</a></li>
                                     <li><a href="shop.php">Shop</a></li>
-                                    <li><a href="contact.php">Contact</a></li>
                                 </ul>
                             </li>
-                            <li><a href="contact.php">Contact</a></li>
                             <?php if (isset($username)): ?>
                                 <span style="border-left: 1px solid #ccc; height: 20px; margin: 0 10px;"></span> <!-- Separator vertical -->
                                 <li>
@@ -134,13 +132,7 @@ if ($result->num_rows > 0) {
 
             <!-- Header Meta Data -->
             <div class="header-meta d-flex clearfix justify-content-end">
-                <!-- Search Area -->
-                <div class="search-area">
-                    <form action="#" method="post">
-                        <input type="search" name="search" id="headerSearch" placeholder="Type for search">
-                        <button type="submit"><i class="fa fa-search" aria-hidden="true"></i></button>
-                    </form>
-                </div>
+
                 <!-- Favourite Area -->
                 <div class="favourite-area">
                     <a href="favourite.php"><img src="img/core-img/heart.svg" alt=""></a>
@@ -418,7 +410,6 @@ function removeCartItem(productId) {
                         <div class="footer_menu">
                             <ul>
                                 <li><a href="shop.php">Shop</a></li>
-                                <li><a href="contact.php">Contact</a></li>
                             </ul>
                         </div>
                     </div>

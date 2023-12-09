@@ -127,10 +127,8 @@ function getProductsBySubcategory($con, $subcategory) {
                                 <ul class="dropdown">
                                     <li><a href="<?php echo isset($_SESSION['user_id']) && isset($_SESSION['authenticated']) ? 'index_autentificat.php' : 'index.php'; ?>">Home</a></li>
                                     <li><a href="shop.php">Shop</a></li>
-                                    <li><a href="contact.php">Contact</a></li>
                                 </ul>
                             </li>
-                            <li><a href="contact.php">Contact</a></li>
                         </ul>
                     </div>
                     <!-- Nav End -->
@@ -139,13 +137,7 @@ function getProductsBySubcategory($con, $subcategory) {
 
             <!-- Header Meta Data -->
             <div class="header-meta d-flex clearfix justify-content-end">
-                <!-- Search Area -->
-                <div class="search-area">
-                    <form action="#" method="post">
-                        <input type="search" name="search" id="headerSearch" placeholder="Type for search">
-                        <button type="submit"><i class="fa fa-search" aria-hidden="true"></i></button>
-                    </form>
-                </div>
+
                 <!-- Favourite Area -->
                 <div class="favourite-area">
                     <a href="favourite.php"><img src="img/core-img/heart.svg" alt=""></a>
@@ -447,7 +439,6 @@ function removeCartItem(productId) {
         ?>
         
         <select name="sort" id="sortByselect" onchange="updateSortingOption()">
-            <option value="highest_rated" <?php echo ($sort === 'highest_rated') ? 'selected' : ''; ?>>Highest Rated</option>
             <option value="price_asc" <?php echo ($sort === 'price_asc') ? 'selected' : ''; ?>>Price: Low to High</option>
             <option value="price_desc" <?php echo ($sort === 'price_desc') ? 'selected' : ''; ?>>Price: High to Low</option>
         </select>
@@ -733,7 +724,6 @@ if ($total_pagini > 1) {
                         <div class="footer_menu">
                             <ul>
                                 <li><a href="shop.php">Shop</a></li>
-                                <li><a href="contact.php">Contact</a></li>
                             </ul>
                         </div>
                     </div>

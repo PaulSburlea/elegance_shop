@@ -39,6 +39,8 @@ if (isset($_POST['addtocart'])) {
     <!-- Core Style CSS -->
     <link rel="stylesheet" href="css/core-style.css">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="review.css">
+
 
 
     <style>
@@ -66,6 +68,76 @@ if (isset($_POST['addtocart'])) {
         color: #ff4f00;
         border: 1px solid #ff4f00;
     }
+
+
+
+
+
+
+
+
+
+/* Stilizare pentru pop-up-ul de recenzii */
+.reviews-popup {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+}
+
+.reviews-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    padding: 20px;
+    max-width: 1000px;
+    max-height: 900px;;
+    width: 100%;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+    font-size: 20px;
+    color: #333;
+}
+
+/* Stilizare pentru containerul de recenzii */
+.reviews-container {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.review {
+    border-bottom: 1px solid #ccc;
+    padding: 10px 0;
+}
+
+.reviewer {
+    font-weight: bold;
+}
+
+.review-text {
+    margin-top: 5px;
+}
+
+.review-date {
+    color: #888;
+}
+
+
+
+
+
 </style>
 
 </head>
@@ -126,17 +198,6 @@ if (isset($_POST['addtocart'])) {
 
             <!-- Header Meta Data -->
             <div class="header-meta d-flex clearfix justify-content-end">
-                <!-- Search Area -->
-                <div class="search-area">
-                    <form action="#" method="post">
-                        <input type="search" name="search" id="headerSearch" placeholder="Type for search">
-                        <button type="submit"><i class="fa fa-search" aria-hidden="true"></i></button>
-                    </form>
-                </div>
-                <!-- Favourite Area -->
-                <div class="favourite-area">
-                    <a href="#"><img src="img/core-img/heart.svg" alt=""></a>
-                </div>
                 <!-- Cart Area -->
                 <div class="cart-area">
                     <a href="#" id="essenceCartBtn"><img src="img/core-img/bag.svg" alt=""></a>
@@ -292,51 +353,135 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
         <?php endif; ?>
     </div>
 
-    <!-- Single Product Description -->
-    <div class="single_product_desc clearfix">
-        <span><?php echo $product_name; ?></span>
-        <h2><?php echo $product_name; ?></h2>
-        <p class="product-price">$<?php echo $product_price; ?></p>
-        <p class="product-desc"><?php echo nl2br($product_description); ?></p>
+<!-- Single Product Description -->
+<div class="single_product_desc clearfix">
+    <span><?php echo $product_name; ?></span>
+    <h2><?php echo $product_name; ?></h2>
+    <p class="product-price">$<?php echo $product_price; ?></p>
+    <p class="product-desc"><?php echo nl2br($product_description); ?></p>
 
-        <?php
-        // Afișați dacă produsul este sau nu în stoc
-        if ($product_stock > 0) {
-            echo "<p class='product-stock'>Available in stock</p>";
-        } else {
-            echo "<p class='product-stock out-of-stock'></p>";
-        }
-        ?>
+    <?php
+    // Afișați dacă produsul este sau nu în stoc
+    if ($product_stock > 0) {
+        echo "<p class='product-stock'>Available in stock</p>";
+    } else {
+        echo "<p class='product-stock out-of-stock'></p>";
+    }
 
-<!-- Form -->
-<form class="cart-form clearfix" method="post">
-    <!-- Cart & Favourite Box -->
-    <div class="cart-fav-box d-flex align-items-center">
-        <?php if ($product_stock > 0) : ?>
-            <!-- Cart -->
-            <div class="add-to-cart-btn">
-                <button onclick="addToCart(this)"
-                        data-product-id="<?php echo $row['id']; ?>"
-                        data-product-name="<?php echo $row['nume']; ?>"
-                        data-product-price="<?php echo $row['pret']; ?>"
-                        data-product-image="<?php echo $row['imagine_cale']; ?>">
-                        Add to cart
-                </button>
+    // Calculați și afișați ratingul mediu pentru produs
+    $averageRating = getProductAverageRating($product_id);
+    if ($averageRating !== null) {
+        echo '<p>Rating: ' . number_format($averageRating, 2, '.', '') . '★' . '</p>';
+    } else {
+        echo '<p>This product has no reviews yet.</p>';
+    }
+    ?>
+
+    <!-- Form -->
+    <form class="cart-form clearfix" method="post">
+        <!-- Cart & Favourite Box -->
+        <div class="cart-fav-box d-flex align-items-center">
+            <?php if ($product_stock > 0) : ?>
+                <!-- Cart -->
+                <div class="add-to-cart-btn">
+                    <button onclick="addToCart(this)"
+                            data-product-id="<?php echo $row['id']; ?>"
+                            data-product-name="<?php echo $row['nume']; ?>"
+                            data-product-price="<?php echo $row['pret']; ?>"
+                            data-product-image="<?php echo $row['imagine_cale']; ?>">
+                            Add to cart
+                    </button>
+                </div>
+            <?php else : ?>
+                <!-- Not in Stock -->
+                <p class="product-stock out-of-stock">Not available in stock</p>
+            <?php endif; ?>
+
+            <!-- Reviews Button -->
+            <div class="reviews-button ml-4">
+                <button onclick="openReviewsPopup();return false">Reviews</button>
             </div>
-        <?php else : ?>
-            <!-- Not in Stock -->
-            <p class="product-stock out-of-stock">Not available in stock</p>
-        <?php endif; ?>
+        </div>
+    </form>
 
-        <!-- Favourite -->
-        <div class="product-favourite ml-4">
-            <a href="#" class="favme fa fa-heart"></a>
+    <!-- Right Side Reviews Popup Area -->
+    <div id="reviewsPopup" class="reviews-popup" style="display: none;">
+        <div class="reviews-content">
+            <span class="close" onclick="closeReviewsPopup()">&times;</span>
+            <h2>Reviews for <?php echo $product_name; ?></h2>
+            <div id="reviewsContainer" class="reviews-container">
+                <!-- Aici vor fi afișate recenziile -->
+            </div>
+
+            <!-- Formular pentru adăugarea de recenzii -->
+            <?php if (isset($_SESSION['user_id'])) : ?>
+                <form id="addReviewForm">
+                    <div class="rating-container">
+                        <label for="rating">Rating:</label>
+                        <!-- Adăugare container pentru rating sub formă de stele -->
+                        <div id="starRating" class="star-rating">
+                            <input type="radio" id="star5" name="rating" value="5" />
+                            <label for="star5" title="5 stars"></label>
+                            <input type="radio" id="star4" name="rating" value="4" />
+                            <label for="star4" title="4 stars"></label>
+                            <input type="radio" id="star3" name="rating" value="3" />
+                            <label for="star3" title="3 stars"></label>
+                            <input type="radio" id="star2" name="rating" value="2" />
+                            <label for="star2" title="2 stars"></label>
+                            <input type="radio" id="star1" name="rating" value="1" />
+                            <label for="star1" title="1 star"></label>
+                        </div>
+                        <!-- Sfârșitul containerului pentru rating sub formă de stele -->
+                    </div>
+
+                    <!-- Caseta pentru comentariu -->
+                    <div class="comment-container">
+                        <label for="comment">Comment:</label>
+                        <textarea id="comment" name="comment" required></textarea>
+                    </div>
+
+                    <!-- Buton pentru adăugarea review-ului -->
+                    <button type="button" onclick="addReview()">Add Review</button>
+                </form>
+            <?php else : ?>
+                <p>Autentifică-te pentru a adăuga un review.</p>
+            <?php endif; ?>
         </div>
     </div>
-</form>
+</div>
+
+
+
+
 
     </div>
 </section>
+
+
+
+
+<?php
+
+// Funcția primește un id de produs și realizează o interogare pentru a obține ratingurile recenziilor respective
+function getProductAverageRating($productId) {
+    global $con;
+
+    // Realizați o interogare a bazei de date pentru a obține ratingurile recenziilor pentru produsul dat
+    $query = "SELECT AVG(rating) AS averageRating FROM reviews WHERE id_producs = $productId";
+    $result = $con->query($query);
+
+    // Verificați dacă interogarea a avut succes
+    if ($result) {
+        $row = $result->fetch_assoc();
+        return $row['averageRating'];
+    } else {
+        // Tratați cazul în care interogarea a eșuat
+        return null;
+    }
+}
+
+?>
+
 
 
 
@@ -376,9 +521,137 @@ function addToCart(button) {
              '&product_price=' + encodeURIComponent(productPrice) +
              '&product_image=' + encodeURIComponent(productImage));
 }
+</script>
+
+
+
+
+<script>
+  function openReviewsPopup() {
+    // Deschide pop-up-ul
+    var reviewsPopup = document.getElementById("reviewsPopup");
+    reviewsPopup.style.display = "block";
+
+    // Apelează funcția pentru încărcarea recenziilor dinamic
+    loadReviews();
+  }
+
+  function closeReviewsPopup() {
+    // Închide pop-up-ul
+    var reviewsPopup = document.getElementById("reviewsPopup");
+    reviewsPopup.style.display = "none";
+  }
+
+  function loadReviews() {
+    // Obține id-ul produsului și al utilizatorului (înlocuiește cu logica ta pentru a obține aceste id-uri)
+    var productId = <?php echo $product_id; ?>;
+    var userId = <?php echo isset($_SESSION['user_id']) ? $_SESSION['user_id'] : 'null'; ?>;
+
+    if (!userId || !productId) {
+        console.error('Id-urile utilizatorului și/sau produsului lipsesc.');
+        return;
+    }
+
+    // Trimite id-urile utilizatorului și produsului la server utilizând AJAX
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                // Răspunsul de la server
+                console.log(xhr.responseText);
+
+                // Actualizează conținutul pop-up-ului cu recenzii
+                var reviewsContainer = document.getElementById("reviewsContainer");
+                reviewsContainer.innerHTML = xhr.responseText;
+            } else {
+                console.error('Eroare la comunicarea cu serverul.');
+            }
+        }
+    };
+
+    // Definiți metoda și URL-ul pentru cerere (înlocuiți 'load_reviews.php' cu numele real al scriptului PHP)
+    xhr.open('POST', 'load_reviews.php', true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+    // Trimite datele către server
+    xhr.send('user_id=' + encodeURIComponent(userId) +
+        '&product_id=' + encodeURIComponent(productId));
+  }
+
+  function addReview() {
+    console.log('Funcția addReview() este apelată.');
+
+    // Verifică dacă elementele există
+    var ratingElement = document.getElementById('starRating');
+    var commentElement = document.getElementById('comment');
+
+    if (!ratingElement || !commentElement) {
+        console.error('Elemente inexistente: ratingElement', ratingElement, 'commentElement', commentElement);
+        return;
+    }
+
+    // Obține valoarea ratingului
+    var ratingElement = document.querySelector('input[name="rating"]:checked');
+    var rating = ratingElement ? ratingElement.value : null;
+
+    // Obține valoarea comentariului și resetează caseta de comentarii
+    var commentElement = document.getElementById('comment');
+    var comment = commentElement ? commentElement.value : null;
+    commentElement.value = '';  // Resetează conținutul casetei de comentarii
+
+    // Verifică dacă valorile sunt valide
+    if (!rating || rating < 1 || rating > 5 || !comment || comment.trim() === '') {
+        alert('Te rog completează ratingul și comentariul.');
+        return;
+    }
+
+    // Trimite datele la server utilizând AJAX
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                // Răspunsul de la server
+                console.log(xhr.responseText);
+
+                // Reîncarcă recenziile pentru a afișa și noul review
+                loadReviews();
+            } else {
+                console.error('Eroare la comunicarea cu serverul. Status:', xhr.status, 'Răspuns:', xhr.responseText);
+            }
+        }
+    };
+
+    // Definiți metoda și URL-ul pentru cerere (înlocuiți 'add_review.php' cu numele real al scriptului PHP)
+    xhr.open('POST', 'add_review.php', true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+
+    // Trimite datele către server
+    xhr.send(
+        'user_id=' + encodeURIComponent(<?php echo $_SESSION['user_id']; ?>) +
+        '&product_id=' + encodeURIComponent(<?php echo $product_id; ?>) +
+        '&rating=' + encodeURIComponent(rating) +
+        '&comment=' + encodeURIComponent(comment)
+    );
+
+    // Resetează stelele selectate
+    var starInputs = document.querySelectorAll('input[name="rating"]');
+    starInputs.forEach(function(input) {
+        input.checked = false;
+    });
+}
+
 
 
 </script>
+
+
+
+
+
+
+
+
+
 
 
 
@@ -458,6 +731,8 @@ function addToCart(button) {
     <script src="js/classy-nav.min.js"></script>
     <!-- Active js -->
     <script src="js/active.js"></script>
+
+    
 
 </body>
 

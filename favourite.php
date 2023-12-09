@@ -217,6 +217,11 @@ body {
     });
 </script>
 
+
+
+
+
     <!-- Adaugă subsolul paginii, link-uri către scripturi JavaScript sau alte fișiere relevante -->
 </body>
+
 </html>
